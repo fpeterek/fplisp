@@ -1,8 +1,9 @@
 mod lexer;
+mod interpreter;
 
 use std::env;
-use std::fs;
 use crate::lexer::Lexer;
+use crate::interpreter::Interpreter;
 
 
 fn main() {
@@ -10,28 +11,21 @@ fn main() {
 
     match args.len() {
         0 => println!("Error: no file to interpret"),
-        1 => run_script(&args[0]),
-        _ => println!("Too many arguments")
+        _ => run_script(args[0].clone()),
     }
 }
 
 
-fn run_script(file: &String) {
-
-    let contents = fs::read_to_string(file);
-
-    match contents {
-        Err(_) => println!("File '{file}' could not be read"),
-        Ok(con) => interpret(&con)
-    }
-
+fn run_script(file: String) {
+    let int = Interpreter::new();
+    int.interpret(file);
 }
 
-fn interpret(str: &String) {
-    let lexemes = lex(&str);
+fn interpret(file: &String, str: &String) {
+    let lexemes = lex(file, &str);
 }
 
-fn lex(str: &String) {
-    Lexer::lex(str);
+fn lex(file: &String, str: &String) {
+    Lexer::lex(file, str);
 }
 

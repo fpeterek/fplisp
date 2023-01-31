@@ -2,23 +2,24 @@ use std::iter::Peekable;
 use std::str::Chars;
 
 
-pub struct Lexer<'a> {
+pub struct Lexer<'a, 'b> {
     chars: Peekable<Chars<'a>>,
     lexemes: Vec<String>,
 
     char: u64,
     line: u64,
 
-    file: String,
+    file: &'b String,
 }
 
-impl Lexer<'_> {
-    fn new<'a>(input: &'a String) -> Lexer<'a> {
+impl Lexer<'_, '_> {
+    fn new<'a, 'b>(file: &'b String, input: &'a String) -> Lexer<'a, 'b> {
         Lexer {
             chars: input.chars().peekable(),
             lexemes: Vec::new(),
             char: 1,
-            line: 1
+            line: 1,
+            file,
         }
     }
 
@@ -162,8 +163,8 @@ impl Lexer<'_> {
         }
     }
 
-    pub fn lex(str: &String) -> Vec<String> {
-        let mut lexer = Lexer::new(&str);
+    pub fn lex<'a, 'b>(file: &'b String, contents: &'a String) -> Vec<String> {
+        let mut lexer = Lexer::new(file, contents);
         lexer.lex_analysis();
         lexer.lexemes
     }

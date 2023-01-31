@@ -1,4 +1,4 @@
-enum Atom {
+enum LexAtom {
     Float { value: String },
     Int { value: String },
     Str { value: String },
