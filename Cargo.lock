@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "fplist"
+name = "fplisp"
 version = "0.1.0"
