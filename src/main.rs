@@ -1,8 +1,8 @@
-mod tokenizer;
+mod lexer;
 
 use std::env;
 use std::fs;
-use crate::tokenizer::Tokenizer;
+use crate::lexer::Lexer;
 
 
 fn main() {
@@ -28,10 +28,10 @@ fn run_script(file: &String) {
 }
 
 fn interpret(str: &String) {
-    let tokens = tokenize(&str);
+    let lexemes = lex(&str);
 }
 
-fn tokenize(str: &String) {
-    Tokenizer::tokenize(str);
+fn lex(str: &String) {
+    Lexer::lex(str);
 }
 

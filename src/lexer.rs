@@ -2,16 +2,23 @@ use std::iter::Peekable;
 use std::str::Chars;
 
 
-pub struct Tokenizer<'a> {
+pub struct Lexer<'a> {
     chars: Peekable<Chars<'a>>,
-    toks: Vec<String>,
+    lexemes: Vec<String>,
+
+    char: u64,
+    line: u64,
+
+    file: String,
 }
 
-impl Tokenizer<'_> {
-    fn new<'a>(input: &'a String) -> Tokenizer<'a> {
-        Tokenizer {
+impl Lexer<'_> {
+    fn new<'a>(input: &'a String) -> Lexer<'a> {
+        Lexer {
             chars: input.chars().peekable(),
-            toks: Vec::new(),
+            lexemes: Vec::new(),
+            char: 1,
+            line: 1
         }
     }
 
@@ -19,7 +26,14 @@ impl Tokenizer<'_> {
         let num = ch as u32;
 
         ch == '!' || (35 <= num && num <= 38) || ch == '*' || ch == '+' || ch == '-' || ch == '/' || ch == ':' ||
-            (60 <= num && num <= 90) || (94 <= num && num <= 122) || ch == '|' || ch == '~'
+            ch.is_alphanumeric() || ch == '|' || ch == '~'
+    }
+
+    fn is_valid_id_start(ch: char) -> bool {
+        let num = ch as u32;
+
+        ch == '!' || (35 <= num && num <= 38) || ch == '*' || ch == '+' || ch == '-' || ch == '/' || ch == ':' ||
+            ch.is_alphabetic() || ch == '|' || ch == '~'
     }
 
     fn drop_line(&mut self) {
@@ -59,7 +73,7 @@ impl Tokenizer<'_> {
         }
 
         if !string.is_empty() {
-            self.toks.push(string);
+            self.lexemes.push(string);
         }
     }
 
@@ -72,7 +86,6 @@ impl Tokenizer<'_> {
             // We peek so as not to consume the character following the number
             let next = self.chars.peek();
 
-            // TODO: Ignore period if number ends with a period
             match next {
                 None => break,
                 Some(x) => if *x == '.' && has_period {
@@ -91,7 +104,7 @@ impl Tokenizer<'_> {
         }
 
         if !number.is_empty() {
-            self.toks.push(number)
+            self.lexemes.push(number)
         }
     }
 
@@ -103,7 +116,7 @@ impl Tokenizer<'_> {
         match self.chars.peek() {
             Some(x) => if x.is_digit(10) {
                 self.load_num()
-            } else {
+            } else if Lexer::is_valid_id_start(*x) {
                 self.load_id()            
             }
 
@@ -114,15 +127,15 @@ impl Tokenizer<'_> {
     fn process_next(&mut self) {
         match self.chars.next() {
             Some('\'') => {
-                self.toks.push("'".to_string());
+                self.lexemes.push("'".to_string());
             }
 
             Some('(') => {
-                self.toks.push("(".to_string());
+                self.lexemes.push("(".to_string());
             }
 
             Some(')') => {
-                self.toks.push(")".to_string());
+                self.lexemes.push(")".to_string());
             }
 
             Some(';') => {
@@ -133,7 +146,9 @@ impl Tokenizer<'_> {
                 self.parse_str();
             }
 
-            Some(_) => {
+            Some(x) => if x.is_whitespace() {
+                ()
+            } else {
                 self.load_atom();
             }
 
@@ -141,15 +156,15 @@ impl Tokenizer<'_> {
         }
     }
 
-    fn tok(&mut self) {
+    fn lex_analysis(&mut self) {
         while self.chars.peek() != None {
             self.process_next();
         }
     }
 
-    pub fn tokenize(str: &String) -> Vec<String> {
-        let mut tokenizer = Tokenizer::new(&str);
-        tokenizer.tok();
-        tokenizer.toks
+    pub fn lex(str: &String) -> Vec<String> {
+        let mut lexer = Lexer::new(&str);
+        lexer.lex_analysis();
+        lexer.lexemes
     }
 }
