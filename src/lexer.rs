@@ -1,25 +1,34 @@
 use std::iter::Peekable;
 use std::str::Chars;
+use std::rc::Rc;
 
 
-pub struct Lexer<'a, 'b> {
+pub struct Lexer<'a> {
     chars: Peekable<Chars<'a>>,
     lexemes: Vec<String>,
 
     char: u64,
     line: u64,
 
-    file: &'b String,
+    file: Rc<String>,
 }
 
-impl Lexer<'_, '_> {
-    fn new<'a, 'b>(file: &'b String, input: &'a String) -> Lexer<'a, 'b> {
+impl Lexer<'_> {
+    fn new<'a>(file: Rc<String>, input: &'a String) -> Lexer<'a> {
         Lexer {
             chars: input.chars().peekable(),
             lexemes: Vec::new(),
             char: 1,
             line: 1,
             file,
+        }
+    }
+
+    fn position(&self) -> Position {
+        Position {
+            char: self.char,
+            line: self.line,
+            file: self.file.clone(),
         }
     }
 
@@ -37,9 +46,30 @@ impl Lexer<'_, '_> {
             ch.is_alphabetic() || ch == '|' || ch == '~'
     }
 
+    fn next(&mut self) -> Option<char> {
+        let char = self.chars.next();
+
+        match char {
+            Some('\n') => {
+                self.line += 1;
+                self.char = 0;
+            }
+            Some(_) => {
+                self.char += 1;
+            }
+            None => ()
+        }
+
+        char
+    }
+
+    fn peek(&mut self) -> Option<&char> {
+        self.chars.peek()
+    }
+
     fn drop_line(&mut self) {
         loop {
-            match self.chars.next() {
+            match self.next() {
                 Some('\n') => return,
                 Some(_) => (),
                 None => return,
@@ -53,10 +83,10 @@ impl Lexer<'_, '_> {
         let mut string = "".to_string();
 
         // Ignore quotes
-        self.chars.next();
+        self.next();
 
         loop {
-            let next = self.chars.next();
+            let next = self.next();
 
             match next {
                 Some('"') => if is_escape {
@@ -85,7 +115,7 @@ impl Lexer<'_, '_> {
 
         loop {
             // We peek so as not to consume the character following the number
-            let next = self.chars.peek();
+            let next = self.peek();
 
             match next {
                 None => break,
@@ -101,7 +131,7 @@ impl Lexer<'_, '_> {
                 }
             }
 
-            self.chars.next();
+            self.next();
         }
 
         if !number.is_empty() {
@@ -114,7 +144,7 @@ impl Lexer<'_, '_> {
     }
 
     fn load_atom(&mut self) {
-        match self.chars.peek() {
+        match self.peek() {
             Some(x) => if x.is_digit(10) {
                 self.load_num()
             } else if Lexer::is_valid_id_start(*x) {
@@ -126,7 +156,7 @@ impl Lexer<'_, '_> {
     }
 
     fn process_next(&mut self) {
-        match self.chars.next() {
+        match self.peek() {
             Some('\'') => {
                 self.lexemes.push("'".to_string());
             }
@@ -148,7 +178,7 @@ impl Lexer<'_, '_> {
             }
 
             Some(x) => if x.is_whitespace() {
-                ()
+                drop(x);
             } else {
                 self.load_atom();
             }
@@ -163,7 +193,7 @@ impl Lexer<'_, '_> {
         }
     }
 
-    pub fn lex<'a, 'b>(file: &'b String, contents: &'a String) -> Vec<String> {
+    pub fn lex<'a>(file: Rc<String>, contents: &'a String) -> Vec<String> {
         let mut lexer = Lexer::new(file, contents);
         lexer.lex_analysis();
         lexer.lexemes

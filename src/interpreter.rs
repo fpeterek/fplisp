@@ -1,28 +1,31 @@
 use std::collections::HashSet;
+use std::rc::Rc;
 use std::fs;
 
+use crate::lexer::Lexer;
 
-pub struct Interpreter<'a> {
-    files: HashSet<String>,
-    current_file: Option<&'a String>,
+
+pub struct Interpreter {
+    files: HashSet<Rc<String>>,
+    current_file: Option<Rc<String>>,
 }
 
-impl Interpreter<'_> {
+impl Interpreter {
 
-    fn run(&mut self, file: String, contents: String) {
-
+    fn run(&mut self, file: Rc<String>, contents: String) {
+        let lexemes = Lexer::lex(file, &contents);
     }
 
     pub fn interpret(&mut self, file: String) {
-        self.files.insert(file.clone());
-        self.current_file = Some(&self.files.get(&file).unwrap());
+        let rc = Rc::new(file.clone());
+        self.files.insert(rc.clone());
+        self.current_file = Some(rc.clone());
 
-        self.files.get(&file);
-        let contents = fs::read_to_string(file);
+        let contents = fs::read_to_string(&file);
 
         match contents {
-            Err(x) => println!("Contents of file {} could not be loaded", file),
-            Ok(con) => self.run(file, con)
+            Err(_) => println!("Contents of file {} could not be loaded", file),
+            Ok(con) => self.run(rc, con)
         }
     }
 

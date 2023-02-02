@@ -2,7 +2,6 @@ mod lexer;
 mod interpreter;
 
 use std::env;
-use crate::lexer::Lexer;
 use crate::interpreter::Interpreter;
 
 
@@ -17,15 +16,7 @@ fn main() {
 
 
 fn run_script(file: String) {
-    let int = Interpreter::new();
+    let mut int = Interpreter::new();
     int.interpret(file);
-}
-
-fn interpret(file: &String, str: &String) {
-    let lexemes = lex(file, &str);
-}
-
-fn lex(file: &String, str: &String) {
-    Lexer::lex(file, str);
 }
 
