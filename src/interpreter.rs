@@ -2,7 +2,9 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::fs;
 
+use crate::lexeme::Lexeme;
 use crate::lexer::Lexer;
+use crate::parser::Parser;
 
 
 pub struct Interpreter {
@@ -12,11 +14,24 @@ pub struct Interpreter {
 
 impl Interpreter {
 
+    fn parse(&mut self, lexemes: Vec<Lexeme>) {
+        let result = Parser::parse(lexemes);
+
+        match result {
+            Ok(_) => todo!(),
+            Err(errors) => {
+                for err in errors {
+                    println!("{}", err);
+                }
+            }
+        }
+    }
+
     fn run(&mut self, file: Rc<String>, contents: String) {
         let result = Lexer::lex(file, &contents);
 
         match result {
-            Ok(lexemes) => println!("{:?}", lexemes),
+            Ok(lexemes) => self.parse(lexemes),
             Err(errors) => {
                 for err in errors {
                     println!("{}", err);

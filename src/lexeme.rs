@@ -1,11 +1,11 @@
 use crate::position::Position;
-use crate::atom::LexAtom;
+use crate::atom::Atom;
 
 
 #[derive(Debug)]
 pub enum Lexeme {
     OpenPar  { position: Position, },
     ClosePar { position: Position, },
-    Atom     { position: Position, atom: LexAtom, },
+    Atom     { position: Position, atom: Atom, },
     Quote    { position: Position, },
 }

@@ -5,7 +5,7 @@ use std::rc::Rc;
 use crate::lexeme::Lexeme;
 use crate::position::Position;
 use crate::report::Report;
-use crate::atom::LexAtom;
+use crate::atom::Atom;
 
 
 pub struct Lexer<'a> {
@@ -114,7 +114,7 @@ impl Lexer<'_> {
         self.lexemes.push(
             Lexeme::Atom { 
                 position,
-                atom: LexAtom::Str { value: string } 
+                atom: Atom::Str { value: string } 
             });
     }
 
@@ -135,7 +135,7 @@ impl Lexer<'_> {
 
         Lexeme::Atom { 
             position,
-            atom: LexAtom::Float { value }
+            atom: Atom::Float { value }
         }
     }
 
@@ -166,7 +166,7 @@ impl Lexer<'_> {
 
         Lexeme::Atom {
             position,
-            atom: LexAtom::Int { value }
+            atom: Atom::Int { value }
         }
     } 
 
@@ -229,7 +229,7 @@ impl Lexer<'_> {
         self.lexemes.push(
             Lexeme::Atom {
                 position,
-                atom: LexAtom::Symbol { value: id }
+                atom: Atom::Symbol { value: id }
             });
     }
 

@@ -4,6 +4,8 @@ mod lexeme;
 mod lexer;
 mod position;
 mod report;
+mod parser;
+mod statement;
 
 use std::env;
 use crate::interpreter::Interpreter;
