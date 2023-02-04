@@ -13,7 +13,16 @@ pub struct Interpreter {
 impl Interpreter {
 
     fn run(&mut self, file: Rc<String>, contents: String) {
-        let lexemes = Lexer::lex(file, &contents);
+        let result = Lexer::lex(file, &contents);
+
+        match result {
+            Ok(lexemes) => println!("{:?}", lexemes),
+            Err(errors) => {
+                for err in errors {
+                    println!("{}", err);
+                }
+            }
+        }
     }
 
     pub fn interpret(&mut self, file: String) {

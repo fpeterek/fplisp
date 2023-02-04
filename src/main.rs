@@ -1,5 +1,9 @@
-mod lexer;
+mod atom;
 mod interpreter;
+mod lexeme;
+mod lexer;
+mod position;
+mod report;
 
 use std::env;
 use crate::interpreter::Interpreter;
@@ -10,7 +14,7 @@ fn main() {
 
     match args.len() {
         0 => println!("Error: no file to interpret"),
-        _ => run_script(args[0].clone()),
+        _ => run_script(args[1].clone()),
     }
 }
 

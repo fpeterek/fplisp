@@ -1,6 +1,7 @@
-enum LexAtom {
-    Float { value: String },
-    Int { value: String },
-    Str { value: String },
-    Symbol { value: string },
+#[derive(Debug)]
+pub enum LexAtom {
+    Float  { value: f64    },
+    Int    { value: i64    },
+    Str    { value: String },
+    Symbol { value: String },
 }
