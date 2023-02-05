@@ -1,5 +1,6 @@
 use std::iter::Peekable;
 use std::slice::Iter;
+use std::rc::Rc;
 
 use crate::atom::Atom;
 use crate::lexeme::Lexeme;
@@ -35,8 +36,8 @@ impl Parser<'_> {
             _ => {
                 let quoted = self.parse_next();
                 return Statement::ConsCell {
-                    left: Box::new(quote),
-                    right: Box::new(quoted),
+                    left: Rc::new(quote),
+                    right: Rc::new(quoted),
                 }
             }
 
@@ -61,18 +62,17 @@ impl Parser<'_> {
             }
         }
 
-
         vec
     }
 
     fn to_list(mut vec: Vec<Statement>) -> Statement {
-        let mut res = Statement::Atom { atom: Atom::Nil };
+        let mut res = Statement::Atom { atom: Atom::EmptyList };
 
         while !vec.is_empty() {
             let last = vec.pop().unwrap();
             res = Statement::ConsCell { 
-                left: Box::new(last),
-                right: Box::new(res),
+                left: Rc::new(last),
+                right: Rc::new(res),
             }
         }
 
@@ -90,7 +90,7 @@ impl Parser<'_> {
 
     fn parse_list(&mut self) -> Statement {
         let begin = self.lexemes.next().expect("Interpreter error");
-        let next = self.lexemes.next();
+        let next = self.lexemes.peek();
 
         let res = match next {
             Some(Lexeme::ClosePar { position: _ }) => Statement::Atom { atom: Atom::EmptyList },
@@ -171,7 +171,10 @@ impl Parser<'_> {
 
         parser.run();
 
-        Err(parser.reports)
+        match parser.reports.len() {
+            0 => Ok(parser.statements),
+            _ => Err(parser.reports),
+        }
     }
 
 }

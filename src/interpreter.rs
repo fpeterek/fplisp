@@ -5,6 +5,7 @@ use std::fs;
 use crate::lexeme::Lexeme;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
+use crate::statement::Statement;
 
 
 pub struct Interpreter {
@@ -14,11 +15,19 @@ pub struct Interpreter {
 
 impl Interpreter {
 
+    fn int(&mut self, statements: Vec<Statement>) {
+        for s in statements {
+            println!("{s}");
+        }
+    }
+
     fn parse(&mut self, lexemes: Vec<Lexeme>) {
         let result = Parser::parse(lexemes);
 
         match result {
-            Ok(_) => todo!(),
+            Ok(s) => {
+                self.int(s)
+            }
             Err(errors) => {
                 for err in errors {
                     println!("{}", err);
