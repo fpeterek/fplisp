@@ -15,7 +15,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     match args.len() {
-        0 => println!("Error: no file to interpret"),
+        0 | 1 => println!("Error: no file to interpret"),
         _ => run_script(args[1].clone()),
     }
 }
