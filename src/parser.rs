@@ -5,22 +5,22 @@ use std::rc::Rc;
 use crate::atom::Atom;
 use crate::lexeme::Lexeme;
 use crate::report::Report;
-use crate::statement::Statement;
+use crate::value::Value;
 use crate::position::Position;
 
 
 pub struct Parser<'a> {
-    statements: Vec<Statement>,
+    statements: Vec<Value>,
     reports: Vec<Report>,
     lexemes: Peekable<Iter<'a, Lexeme>>
 }
 
 impl Parser<'_> {
 
-    fn parse_quote(&mut self) -> Statement {
+    fn parse_quote(&mut self) -> Value {
         let quote_lexeme = self.lexemes.next().unwrap();
 
-        let quote = Statement::Atom { atom: Atom::Symbol { value: "quote".to_string() } };
+        let quote = Value::Atom { atom: Atom::Symbol { value: "quote".to_string() } };
 
         let quoted = self.lexemes.peek();
 
@@ -35,7 +35,7 @@ impl Parser<'_> {
 
             _ => {
                 let quoted = self.parse_next();
-                return Statement::ConsCell {
+                return Value::ConsCell {
                     left: Rc::new(quote),
                     right: Rc::new(quoted),
                 }
@@ -46,7 +46,7 @@ impl Parser<'_> {
         quote
     }
 
-    fn load_list_contents(&mut self) -> Vec<Statement> {
+    fn load_list_contents(&mut self) -> Vec<Value> {
         let mut vec = Vec::new();
 
         loop {
@@ -65,12 +65,12 @@ impl Parser<'_> {
         vec
     }
 
-    fn to_list(mut vec: Vec<Statement>) -> Statement {
-        let mut res = Statement::Atom { atom: Atom::EmptyList };
+    fn to_list(mut vec: Vec<Value>) -> Value {
+        let mut res = Value::Atom { atom: Atom::EmptyList };
 
         while !vec.is_empty() {
             let last = vec.pop().unwrap();
-            res = Statement::ConsCell { 
+            res = Value::ConsCell { 
                 left: Rc::new(last),
                 right: Rc::new(res),
             }
@@ -88,12 +88,12 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_list(&mut self) -> Statement {
+    fn parse_list(&mut self) -> Value {
         let begin = self.lexemes.next().expect("Interpreter error");
         let next = self.lexemes.peek();
 
         let res = match next {
-            Some(Lexeme::ClosePar { position: _ }) => Statement::Atom { atom: Atom::EmptyList },
+            Some(Lexeme::ClosePar { position: _ }) => Value::Atom { atom: Atom::EmptyList },
             Some(_) => {
                 let contents = self.load_list_contents();
                 Parser::to_list(contents)
@@ -105,7 +105,7 @@ impl Parser<'_> {
                         position: Parser::position_of(&begin),
                     });
 
-                Statement::Atom { atom: Atom::EmptyList }
+                Value::Atom { atom: Atom::EmptyList }
             }
         };
 
@@ -126,16 +126,16 @@ impl Parser<'_> {
         res
     }
 
-    fn parse_atom(&mut self) -> Statement {
+    fn parse_atom(&mut self) -> Value {
         let lexeme = self.lexemes.next().expect("Interpreter error");
 
         match lexeme {
-            Lexeme::Atom { position: _, atom } => Statement::Atom { atom: atom.clone() },
+            Lexeme::Atom { position: _, atom } => Value::Atom { atom: atom.clone() },
             _ => panic!("Interpreter error")
         }
     }
 
-    fn parse_next(&mut self) -> Statement {
+    fn parse_next(&mut self) -> Value {
         let next = self.lexemes.peek();
 
         match next {
@@ -147,7 +147,7 @@ impl Parser<'_> {
                         msg: "Unmatched closed parenthesis.".to_string(),
                         position: position.clone(),
                     });
-                Statement::Atom { atom: Atom::Nil }
+                Value::Atom { atom: Atom::Nil }
             }
             Some(Lexeme::Atom { position: _, atom: _ }) => self.parse_atom(),
             Some(Lexeme::Quote { position: _ }) => self.parse_quote(),
@@ -162,7 +162,7 @@ impl Parser<'_> {
         }
     }
 
-    pub fn parse(lexemes: Vec<Lexeme>) -> Result<Vec<Statement>, Vec<Report>> {
+    pub fn parse(lexemes: Vec<Lexeme>) -> Result<Vec<Value>, Vec<Report>> {
         let mut parser = Parser {
             statements: Vec::new(),
             reports: Vec::new(),

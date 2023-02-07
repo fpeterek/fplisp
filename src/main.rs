@@ -5,10 +5,13 @@ mod lexer;
 mod position;
 mod report;
 mod parser;
-mod statement;
+mod value;
+mod fplisp;
+mod script_context;
+mod export_redefinition_error;
 
 use std::env;
-use crate::interpreter::Interpreter;
+use crate::fplisp::FPLisp;
 
 
 fn main() {
@@ -22,7 +25,7 @@ fn main() {
 
 
 fn run_script(file: String) {
-    let mut int = Interpreter::new();
+    let mut int = FPLisp::new();
     int.interpret(file);
 }
 
