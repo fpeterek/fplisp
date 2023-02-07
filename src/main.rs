@@ -9,6 +9,7 @@ mod value;
 mod fplisp;
 mod script_context;
 mod export_redefinition_error;
+mod function;
 
 use std::env;
 use crate::fplisp::FPLisp;

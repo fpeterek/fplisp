@@ -39,14 +39,18 @@ impl Lexer<'_> {
         }
     }
 
+    fn special_chars() -> &'static str {
+        "!%&*+-/:<>|~=^?"
+    }
+
     fn is_valid_id_char(ch: char) -> bool {
-        let special_chars = "!%&*+-/:<>|~=^";
+        let special_chars = Lexer::special_chars();
 
         special_chars.contains(ch) || ch.is_alphanumeric()
     }
 
     fn is_valid_id_start(ch: char) -> bool {
-        let special_chars = "!%&*+-/:<>|~=^";
+        let special_chars = Lexer::special_chars();
 
         special_chars.contains(ch) || ch.is_alphabetic()
     }
