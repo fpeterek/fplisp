@@ -2,9 +2,9 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::fs;
 
-use crate::lexeme::Lexeme;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
+use crate::report::Report;
 use crate::value::Value;
 
 
@@ -15,36 +15,36 @@ pub struct FPLisp {
 
 impl FPLisp {
 
-    fn int(&mut self, statements: Vec<Value>) {
+    fn interpret_ast(&mut self, statements: Vec<Value>) -> Result<(), Vec<Report>> {
         for s in statements {
             println!("{s}");
         }
+
+        Ok(())
     }
 
-    fn parse(&mut self, lexemes: Vec<Lexeme>) {
-        let result = Parser::parse(lexemes);
-
-        match result {
-            Ok(s) => {
-                self.int(s)
-            }
-            Err(errors) => {
-                for err in errors {
-                    println!("{}", err);
-                }
-            }
+    fn print_errors(errors: Vec<Report>) {
+        for err in errors {
+            println!("{}", err);
         }
     }
 
-    fn run(&mut self, file: Rc<String>, contents: String) {
-        let result = Lexer::lex(file, &contents);
+    fn parse_and_run(&mut self, file: Rc<String>, contents: String) -> Result<(), Vec<Report>> {
 
-        match result {
-            Ok(lexemes) => self.parse(lexemes),
+        let lexemes = Lexer::lex(file, &contents)?;
+        let ast = Parser::parse(lexemes)?;
+        self.interpret_ast(ast)?;
+
+        Ok(())
+    }
+
+    fn interpret_string(&mut self, file: Rc<String>, contents: String) {
+        let res = self.parse_and_run(file, contents);
+
+        match res {
+            Ok(_) => (),
             Err(errors) => {
-                for err in errors {
-                    println!("{}", err);
-                }
+                FPLisp::print_errors(errors)
             }
         }
     }
@@ -58,7 +58,7 @@ impl FPLisp {
 
         match contents {
             Err(_) => println!("Contents of file {} could not be loaded", file),
-            Ok(con) => self.run(rc, con)
+            Ok(con) => self.interpret_string(rc, con)
         }
     }
 
