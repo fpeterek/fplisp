@@ -23,7 +23,7 @@ impl Clone for Value {
 
 impl Value {
 
-    fn is_nil(&self) -> bool {
+    pub fn is_nil(&self) -> bool {
         if let Value::Atom { atom } = self {
             *atom == Atom::Nil
         } else {
@@ -31,15 +31,22 @@ impl Value {
         }
     }
 
-    fn not_nil(&self) -> bool {
+    pub fn not_nil(&self) -> bool {
         !self.is_nil()
     }
 
-    fn is_empty_list(&self) -> bool {
+    pub fn is_empty_list(&self) -> bool {
         if let Value::Atom { atom } = self {
             *atom == Atom::EmptyList
         } else {
             false
+        }
+    }
+
+    pub fn is_list(&self) -> bool {
+        match self {
+             Value::ConsCell { left: _, right: _ } => true,
+             _ => false
         }
     }
 

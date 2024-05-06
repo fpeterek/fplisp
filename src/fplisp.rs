@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::fs;
 
+use crate::interpreter::Interpreter;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
 use crate::report::Report;
@@ -16,9 +17,11 @@ pub struct FPLisp {
 impl FPLisp {
 
     fn interpret_ast(&mut self, statements: Vec<Value>) -> Result<(), Vec<Report>> {
-        for s in statements {
-            println!("{s}");
-        }
+        // for s in statements {
+        //     println!("{s}");
+        // }
+        let interpreter = Interpreter::new();
+        interpreter.interpret(statements);
 
         Ok(())
     }
